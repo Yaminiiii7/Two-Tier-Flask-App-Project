@@ -247,7 +247,7 @@ pipeline {
         stage('Clone Code') {
             steps {
                 // Replace with your GitHub repository URL
-                git branch: 'main', url: '[https://github.com/Yaminiiii7/Two-Tier-Flask-App-Project.git](https://github.com/Yaminiiii7/Two-Tier-Flask-App-Project.git)'
+                git branch: 'main', url: 'https://github.com/Yaminiiii7/Two-Tier-Flask-App-Project.git'
             }
         }
         stage('Build Docker Image') {
