@@ -277,7 +277,7 @@ pipeline {
 1.  **Create a New Pipeline Job in Jenkins:**
     * From the Jenkins dashboard, select **New Item**.
     * Name the project, choose **Pipeline**, and click **OK**.
-<img src="diagrams/createitem.png">
+<img src="diagrams/newitem.png">
 
 2.  **Configure the Pipeline:**
     * In the project configuration, scroll to the **Pipeline** section.
