@@ -1,7 +1,7 @@
 # DevOps Project Report: Automated CI/CD Pipeline for a 2-Tier Flask Application on AWS
 
 **Author:** Yamini Mandadi
-**Date:** August 23, 2025
+**Date:** December 27, 2025
 
 ---
 
@@ -63,19 +63,20 @@ This document outlines the step-by-step process for deploying a 2-tier web appli
 1.  **Launch EC2 Instance:**
     * Navigate to the AWS EC2 console.
     * Launch a new instance using the **Ubuntu 22.04 LTS** AMI.
-    * Select the **t2.micro** instance type for free-tier eligibility.
+    * Select the **t2.micro**/**c7i-flex.large** instance type for free-tier eligibility.
     * Create and assign a new key pair for SSH access.
 
-<img src="diagrams/01.png">
+<img src="diagrams/instance.png">
+
 
 2.  **Configure Security Group:**
     * Create a security group with the following inbound rules:
-        * **Type:** SSH, **Protocol:** TCP, **Port:** 22, **Source:** Your IP
+        * **Type:** SSH, **Protocol:** TCP, **Port:** 22, **Source:** Your IP or 0.0.0.0/0 
         * **Type:** HTTP, **Protocol:** TCP, **Port:** 80, **Source:** Anywhere (0.0.0.0/0)
         * **Type:** Custom TCP, **Protocol:** TCP, **Port:** 5000 (for Flask), **Source:** Anywhere (0.0.0.0/0)
         * **Type:** Custom TCP, **Protocol:** TCP, **Port:** 8080 (for Jenkins), **Source:** Anywhere (0.0.0.0/0)
 
-<img src="diagrams/02.png">
+<img src="diagrams/securityGroup.png">
 
 3.  **Connect to EC2 Instance:**
     * Use SSH to connect to the instance's public IP address.
@@ -147,7 +148,7 @@ This document outlines the step-by-step process for deploying a 2-tier web appli
     sudo usermod -aG docker jenkins
     sudo systemctl restart jenkins
     ```
-<img src="diagrams/03.png">
+
 
 ---
 
@@ -276,6 +277,7 @@ pipeline {
 1.  **Create a New Pipeline Job in Jenkins:**
     * From the Jenkins dashboard, select **New Item**.
     * Name the project, choose **Pipeline**, and click **OK**.
+<img src="diagrams/createitem.png">
 
 2.  **Configure the Pipeline:**
     * In the project configuration, scroll to the **Pipeline** section.
@@ -285,18 +287,69 @@ pipeline {
     * Verify the **Script Path** is `Jenkinsfile`.
     * Save the configuration.
 
-<img src="diagrams/04.png">
+<img src="diagrams/configure-pipeline.png">
 
 3.  **Run the Pipeline:**
     * Click **Build Now** to trigger the pipeline manually for the first time.
     * Monitor the execution through the **Stage View** or **Console Output**.
 
-<img src="diagrams/05.png">
-<img src="diagrams/06.png">
+<img src="diagrams/sucess_console.png">
 
 4.  **Verify Deployment:**
     * After a successful build, your Flask application will be accessible at `http://<your-ec2-public-ip>:5000`.
     * Confirm the containers are running on the EC2 instance with `docker ps`.
+
+<img src="diagrams/display.png">
+
+5. **Test the volumes persistance(optional)**
+    * Enter any text as shown 
+      
+    <img src="diagrams/enterdata.png">
+
+    * Stop the container
+    ```
+        docker stop mysql
+        docker ps -a
+   
+    ```
+    <img src="diagrams/dockerstop.png">
+
+    * Refresh the browser
+    
+    * Restart the mysql container and Look at the text in the application still exists.(Volume persistence)
+
+6. **Check the stored SQL data(optional)**
+    ```
+        docker exec -it mysql bash
+        mysql -u root -proot
+        show databases;
+        use devops;
+        select * from messages;
+        exit
+  
+    ```
+
+    <img src="diagrams/checkSQLdata.png">
+
+7. **Inspect the volume (optional)**
+
+    ```
+        docker volume ls
+        docker inspect <volumename>
+        sudo su
+        cd /var/lib/docker/volumes/<volumename>/_data
+        (or)
+        cd <mountpath>
+        ls
+
+    ```
+
+    <img src="diagrams/inspectVolume.png">
+
+8. **Troubleshooting**
+    * Incase Jenkins server is taking longer time to run the job(>3 minutes for this project), check the monitoring tab for CPU and memory utilisation.If exceeds > 60%, its time to change the instance type to larger one.(In my case I switched from t3.micro to c7i-flex.large)
+
+    <img src="diagrams/monitoring.png">
 
 ---
 
